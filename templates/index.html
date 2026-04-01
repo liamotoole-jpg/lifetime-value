@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Conduit Totals Processor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function showProcessing() {
+            document.getElementById('uploadForm').style.display = 'none';
+            document.getElementById('statusMessage').style.display = 'block';
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const dropZone = document.getElementById("drop-zone");
+            const fileInput = document.getElementById("fileInput");
+            const fileNameDisplay = document.getElementById("file-name");
+        
+            dropZone.addEventListener("click", () => fileInput.click());
+        
+            dropZone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropZone.classList.add("dragover");
+            });
+        
+            dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+        
+            dropZone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropZone.classList.remove("dragover");
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileNameDisplay.textContent = e.dataTransfer.files[0].name;
+                }
+            });
+        
+            fileInput.addEventListener("change", () => {
+                if (fileInput.files.length > 0) {
+                    fileNameDisplay.textContent = fileInput.files[0].name;
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.webp') }}" alt="Logo">
+        </div>
+
+        <h2>Conduit Totals Generator</h2>
+
+        <div id="statusMessage" style="display: none;">
+            <p>Processing your donation data... please wait.</p>
+        </div>
+
+        {% if status == "ready" %}
+            <div class="download-message">
+                <p>Analysis Complete!</p>
+                <a href="{{ download_url }}">Click here to download your Conduit Totals CSV</a>
+                <br><br>
+                <a href="/" style="text-decoration: none; font-size: 0.8em;">Process another file</a>
+            </div>
+        {% else %}
+            <form id="uploadForm" action="/" method="post" enctype="multipart/form-data" onsubmit="showProcessing()">
+                <div class="form-row">
+                    <label for="client">Organization:</label>
+                    <select name="client" required>
+                        <option value="" disabled selected>Select an Org</option>
+                        <option value="johnson">Mike Johnson for Louisiana</option>
+                        <option value="afw">America First Works</option>
+                        <option value="britt">Britt for Alabama Inc.</option>
+                        <option value="daf">Defending America's Future</option>
+                        <option value="rogers">Rogers for Senate</option>
+                        <option value="hilton">Steve Hilton for Governor 2026</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>Donation CSV:</label>
+                    <div id="drop-zone">
+                        <p>Drag & drop WinRed CSV here<br>or click to select</p>
+                        <input type="file" name="file" id="fileInput" accept=".csv" required style="display:none;">
+                    </div>
+                    <span id="file-name" style="display: block; margin-top: 10px; font-weight: bold; color: #1a3c6e;"></span>
+                </div>
+
+                <input type="submit" value="Generate Report">
+            </form>
+        {% endif %}
+    </div>
+</body>
+</html>
